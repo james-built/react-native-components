@@ -17,6 +17,7 @@ import {
     ViewStyle,
 } from 'react-native';
 import Text from './Text';
+import { exceedsMajorIOSVersion } from '../../utils/platform';
 
 type Props = {
     value: Date | undefined;
@@ -55,9 +56,17 @@ export default function DatePicker(props: Props) {
         setShowPicker(false);
     };
 
-    return (
-        <View style={[styles.inputContainer, inputContainerStyle]}>
-            {!!label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
+    const renderNewIosPicker = () => (
+        <RNDateTimePicker
+            value={value || new Date()}
+            mode={mode}
+            onChange={handleChange}
+            {...otherProps}
+        />
+    );
+
+    const renderDefaultPicker = () => (
+        <>
             <TouchableOpacity onPress={() => setShowPicker(true)}>
                 {mode === 'time' ? (
                     <Text style={[styles.text, textStyle]}>
@@ -92,6 +101,15 @@ export default function DatePicker(props: Props) {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+        </>
+    );
+
+    return (
+        <View style={[styles.inputContainer, inputContainerStyle]}>
+            {!!label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
+            {exceedsMajorIOSVersion(13)
+                ? renderNewIosPicker()
+                : renderDefaultPicker()}
         </View>
     );
 }
